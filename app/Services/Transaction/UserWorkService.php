@@ -3,25 +3,24 @@
 namespace App\Services\Transaction;
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use App\Models\User;
+use App\Models\Transaction;
 use Carbon\Carbon;
 
 class UserWorkService
 {
-    public function getUserWorkSummary(int $perPage) {
+    public function getUserWorkSummary(int $perPage)
+    {
         return Cache::remember("user_work_summary_page_$perPage", 60, function () use ($perPage) {
-            $query = DB::table('transactions')
-                ->selectRaw('user_id, TO_TIMESTAMP(time)::date as date')
+            $query = Transaction::selectRaw('user_id, DATE(TO_TIMESTAMP(time)) as date')
                 ->groupBy('user_id', 'date')
                 ->orderByDesc('date');
 
             $paginated = $query->paginate($perPage);
 
             $paginated->getCollection()->transform(function ($record) {
-                $transactions = DB::table('transactions')
-                    ->where('user_id', $record->user_id)
-                    ->whereRaw('TO_TIMESTAMP(time)::date = ?', [$record->date])
+                $transactions = Transaction::where('user_id', $record->user_id)
+                    ->whereRaw('DATE(TO_TIMESTAMP(time)) = ?', [$record->date])
                     ->orderBy('time')
                     ->get();
 
@@ -60,8 +59,7 @@ class UserWorkService
         $start = $this->safeParseDate($startDate, now()->startOfMonth());
         $end = $this->safeParseDate($endDate, now()->endOfMonth());
 
-        $rawData = DB::table('transactions')
-            ->selectRaw('user_id, time, device_id')
+        $rawData = Transaction::select('user_id', 'time', 'device_id')
             ->whereBetween('time', [$start->timestamp, $end->timestamp])
             ->orderBy('user_id')
             ->orderBy('time')
