@@ -33,7 +33,8 @@ class TransactionController extends Controller
     public function store(StoreTransactionRequest $request): JsonResponse
     {
         try {
-            $data = $this->service->create($request->validated());
+            $items = array_merge($request->validated(), ['server_received_timestamp'=>now()->timestamp]);
+            $data = $this->service->create($items);
             return response()->json(['data' => $data, 'message' => 'Transaction created successfully'], 201);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to create transaction'], 500);

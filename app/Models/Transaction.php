@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Transaction extends Model
@@ -12,9 +13,10 @@ class Transaction extends Model
         'user_id',
         'time',
         'device_id',
+        'server_received_timestamp'
     ];
 
-    public function user() {
-        $this->belongsTo(User::class);
+    public function user(): BelongsTo {
+        return $this->belongsTo(User::class);
     }
 }
