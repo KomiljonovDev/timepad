@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     libpq-dev \
+    && pecl install redis && docker-php-ext-enable redis \
     && docker-php-ext-install pdo_pgsql pdo_mysql mbstring exif pcntl bcmath gd simplexml
 
 # Install Composer

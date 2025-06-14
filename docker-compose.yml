@@ -79,6 +79,14 @@ services:
             - elasticsearch
         networks:
             - timepad_network
+    redis:
+        image: redis:alpine
+        container_name: timepad_redis
+        restart: unless-stopped
+        ports:
+            - "6379:6379"
+        networks:
+            - timepad_network
 
 volumes:
     timepad_db_data:

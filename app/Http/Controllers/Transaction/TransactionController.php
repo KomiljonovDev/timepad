@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Transaction;
 
-use App\Services\Contracts\TransactionServiceInterface;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Transaction\ListTransactionRequest;
 use App\Http\Requests\Transaction\StoreTransactionRequest;
 use App\Http\Requests\Transaction\UpdateTransactionRequest;
-use App\Http\Requests\Transaction\ListTransactionRequest;
-use Illuminate\Http\JsonResponse;
+use App\Services\Contracts\TransactionServiceInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 
 class TransactionController extends Controller
 {
