@@ -127,6 +127,25 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'logstash' => [
+            'driver' => 'monolog',
+            'level' => env('LOG_LEVEL', 'debug'),
+            'handler' => \Monolog\Handler\SocketHandler::class,
+            'handler_with' => [
+                'connectionString' => 'tcp://' . env('LOGSTASH_HOST', 'logstash') . ':' . env('LOGSTASH_PORT', 5044),
+                'level' => env('LOG_LEVEL', 'debug'),
+                'bubble' => true,
+                'persistent' => false,
+                'timeout' => 5.0,
+                'writingTimeout' => 5.0,
+                'connectionTimeout' => 5.0,
+            ],
+            'formatter' => \Monolog\Formatter\LogstashFormatter::class,
+            'formatter_with' => [
+                'applicationName' => 'ishon_app',
+            ],
+        ],
+
     ],
 
 ];

@@ -1,0 +1,89 @@
+services:
+    timepad_app:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+        image: timepad_app
+        container_name: timepad_app
+        restart: unless-stopped
+        working_dir: /var/www/html
+        volumes:
+            - .:/var/www/html
+        networks:
+            - timepad_network
+        depends_on:
+            - timepad_db
+            - timepad_web
+#            - elasticsearch
+#            - logstash
+
+    timepad_db:
+        image: postgres:15
+        container_name: timepad_db
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: ${DB_DATABASE}
+            POSTGRES_USER: ${DB_USERNAME}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+        volumes:
+            - timepad_db_data:/var/lib/postgresql/data
+        networks:
+            - timepad_network
+        ports:
+            - "5430:5432"
+
+    timepad_web:
+        image: nginx:latest
+        container_name: timepad_web
+        restart: unless-stopped
+        ports:
+            - "2020:80"
+        volumes:
+            - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+            - .:/var/www/html
+        networks:
+            - timepad_network
+    elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:9.0.1
+        container_name: elasticsearch
+        environment:
+            - discovery.type=single-node
+            - xpack.security.enabled=false
+            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+        ports:
+            - "9200:9200"
+        volumes:
+            - es_data:/usr/share/elasticsearch/data
+        networks:
+            - timepad_network
+
+    logstash:
+        image: docker.elastic.co/logstash/logstash:9.0.1
+        container_name: logstash
+        volumes:
+            - ./docker/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+            - ./docker/logstash.yml:/usr/share/logstash/config/logstash.yml
+        ports:
+            - "5044:5044"
+        depends_on:
+            - elasticsearch
+        networks:
+            - timepad_network
+
+    kibana:
+        image: docker.elastic.co/kibana/kibana:9.0.1
+        container_name: kibana
+        ports:
+            - "5601:5601"
+        depends_on:
+            - elasticsearch
+        networks:
+            - timepad_network
+
+volumes:
+    timepad_db_data:
+    es_data:
+
+networks:
+    timepad_network:
+        driver: bridge
